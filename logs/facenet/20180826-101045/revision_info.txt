@@ -1,0 +1,7 @@
+arguments: d:/Image_Processing/TensorFlow/simple_facenet/train_tripletloss.py
+--------------------
+tensorflow version: 1.8.0
+--------------------
+git hash: b''
+--------------------
+b''
