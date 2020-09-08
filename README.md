@@ -10,9 +10,9 @@
 
 声明：本代码只用于学习以及入门facenet用，具体请看原始代码，源代码地址：https://github.com/davidsandberg/facenet
 
-python align/align_dataset_mtcnn.py ../../Datasets/lfw_funneled ../../Datasets/lfw_mtcnnpy_160 --image_size 160 --margin 32 --random_order
+python3 align/align_dataset_mtcnn.py ../../Datasets/lfw_funneled ../../Datasets/lfw_mtcnnpy_160x160 --image_size 160 --margin 32 --random_order
 
-python validate_on_lfw.py ../../Datasets/lfw_mtcnnpy_160 ./models/20170512-110547
+python3 validate_on_lfw.py ../../Datasets/lfw_mtcnnpy_160x160 ./models/20170512-110547
 The best threshold is 1.19
 The best threshold is 1.22
 The best threshold is 1.22
@@ -28,19 +28,19 @@ Validation rate: 0.97200+-0.01740 @ FAR=0.00133
 Area Under Curve (AUC): 1.000
 Equal Error Rate (EER): 0.007
 
-python compare.py ./models/20170512-110547 ./data/1.png ./data/2.png
+python3 compare.py ./models/20170512-110547 ./data/1.png ./data/2.png
 Distance matrix
         0         1
 0    0.0000    1.3609
 1    1.3609    0.0000
 
-python compare.py ./models/20170512-110547 ./data/inesta.jpg ./data/messi.jpg
+python3 compare.py ./models/20170512-110547 ./data/inesta.jpg ./data/messi.jpg
 Distance matrix
         0         1
 0    0.0000    1.5232
 1    1.5232    0.0000
 
-python compare.py ./models/20170512-110547 ./data/jobs2.jpg ./data/jobs3.jpg
+python3 compare.py ./models/20170512-110547 ./data/jobs2.jpg ./data/jobs3.jpg
 Distance matrix
         0         1
 0    0.0000    0.9006

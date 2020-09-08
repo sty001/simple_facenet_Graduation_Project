@@ -6,7 +6,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from scipy import misc
+from scipy import misc  
 import tensorflow as tf
 import numpy as np
 import sys
@@ -16,7 +16,8 @@ import facenet
 import align.detect_face
 # import detect_face
 from PIL import Image
-import matplotlib.pyplot as plt
+from matplotlib.pyplot import imread
+import matplotlib.pyplot as plt  
 
 
 def main(args):
@@ -31,15 +32,15 @@ def main(args):
 
         with tf.Session() as sess:
       
-            # Load the model
+            # Load the model加载模型
             facenet.load_model(args.model)
     
-            # Get input and output tensors
+            # Get input and output tensors获得输入输出张量
             images_placeholder = tf.get_default_graph().get_tensor_by_name("input:0")
             embeddings = tf.get_default_graph().get_tensor_by_name("embeddings:0")
             phase_train_placeholder = tf.get_default_graph().get_tensor_by_name("phase_train:0")
 
-            # Run forward pass to calculate embeddings
+            # Run forward pass to calculate embeddings运行正相传递，嵌入计算
             feed_dict = { images_placeholder: images, phase_train_placeholder:False }
             emb = sess.run(embeddings, feed_dict=feed_dict)
             
@@ -50,7 +51,7 @@ def main(args):
                 print('%1d: %s' % (i, args.image_files[i]))
             print('')
             
-            # Print distance matrix
+            # Print distance matrix打印距离矩阵
             print('Distance matrix')
             print('    ', end='')
             for i in range(nrof_images):
@@ -82,7 +83,7 @@ def load_and_align_data(image_paths, image_size, margin, gpu_memory_fraction):
             pnet, rnet, onet = align.detect_face.create_mtcnn(sess, None)
             # pnet, rnet, net = detect_face.create_mtcnn(sess, None)
 
-    tmp_image_paths = image_paths.copy()
+    tmp_image_paths = image_paths
     img_list = []
     for image in tmp_image_paths:
         img = misc.imread(os.path.expanduser(image), mode='RGB')
@@ -103,13 +104,13 @@ def load_and_align_data(image_paths, image_size, margin, gpu_memory_fraction):
         bb[3] = np.minimum(det[3]+margin/2, img_size[0])
         cropped = img[bb[1]:bb[3],bb[0]:bb[2],:]
 
-        # cropped = img
+        # cropped  img 裁剪原始图像，提取所需的人脸部分
         aligned = misc.imresize(cropped, (image_size, image_size), interp='bilinear')
         prewhitened = facenet.prewhiten(aligned)
         img_list.append(prewhitened)
     images = np.stack(img_list)
     return images
-    # return img
+    # return img  返回（裁剪后的）图像
 
 def parse_arguments(argv):
     parser = argparse.ArgumentParser()

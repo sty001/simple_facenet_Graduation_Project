@@ -50,7 +50,7 @@ def decov_loss(xs):
     corr_frob_sqr = tf.reduce_sum(tf.square(corr))
     corr_diag_sqr = tf.reduce_sum(tf.square(tf.diag_part(corr)))
     loss = 0.5*(corr_frob_sqr - corr_diag_sqr)
-    return loss 
+    return loss #损失函数
   
 def center_loss(features, label, alfa, nrof_classes):
     """Center loss based on the paper "A Discriminative Feature Learning Approach for Deep Face Recognition"
@@ -74,7 +74,7 @@ def get_image_paths_and_labels(dataset):
         labels_flat += [i] * len(dataset[i].image_paths)
     return image_paths_flat, labels_flat
 
-def shuffle_examples(image_paths, labels):
+def shuffle_examples(image_paths, labels):#定位图片地址
     shuffle_list = list(zip(image_paths, labels))
     random.shuffle(shuffle_list)
     image_paths_shuff, labels_shuff = zip(*shuffle_list)
@@ -102,7 +102,7 @@ def read_and_augment_data(image_list, label_list, image_size, batch_size, max_nr
     images = ops.convert_to_tensor(image_list, dtype=tf.string)
     labels = ops.convert_to_tensor(label_list, dtype=tf.int32)
     
-    # Makes an input queue
+    # Makes an input queue 输入上面建立的人脸图像列表
     input_queue = tf.train.slice_input_producer([images, labels],
         num_epochs=max_nrof_epochs, shuffle=shuffle)
 
@@ -117,7 +117,7 @@ def read_and_augment_data(image_list, label_list, image_size, batch_size, max_nr
             image = tf.image.resize_image_with_crop_or_pad(image, image_size, image_size)
         if random_flip:
             image = tf.image.random_flip_left_right(image)
-        #pylint: disable=no-member
+        #pylint: disable=no-member  设置图片的大小和相关参数
         image.set_shape((image_size, image_size, 3))
         image = tf.image.per_image_standardization(image)
         images_and_labels.append([image, label])
@@ -140,26 +140,26 @@ def _add_loss_summaries(total_loss):
     Returns:
       loss_averages_op: op for generating moving averages of losses.
     """
-    # Compute the moving average of all individual losses and the total loss.
+    # Compute the moving average of all individual losses and the total loss. 计算所有的个人损失平均值和总损失
     loss_averages = tf.train.ExponentialMovingAverage(0.9, name='avg')
     losses = tf.get_collection('losses')
     loss_averages_op = loss_averages.apply(losses + [total_loss])
   
     # Attach a scalar summmary to all individual losses and the total loss; do the
-    # same for the averaged version of the losses.
+    # same for the averaged version of the losses.将标量总结附加到所有个人损失和总损失;对损失的平均版本做同样的事情
     for l in losses + [total_loss]:
-        # Name each loss as '(raw)' and name the moving average version of the loss
-        # as the original loss name.
+        # Name each loss as '(raw)' and name the moving average version of the loss，
+        # as the original loss name.将每个损失命名为“（原始）”，并将损失的移动平均版本命名为原始损失名称
         tf.summary.scalar(l.op.name +' (raw)', l)
         tf.summary.scalar(l.op.name, loss_averages.average(l))
   
     return loss_averages_op
 
 def train(total_loss, global_step, optimizer, learning_rate, moving_average_decay, update_gradient_vars, log_histograms=True):
-    # Generate moving averages of all losses and associated summaries.
+    # Generate moving averages of all losses and associated summaries.生成所有的损失移动平均值编号和摘要
     loss_averages_op = _add_loss_summaries(total_loss)
 
-    # Compute gradients.
+    # Compute gradients.计算梯度具体操作
     with tf.control_dependencies([loss_averages_op]):
         if optimizer=='ADAGRAD':
             opt = tf.train.AdagradOptimizer(learning_rate)
@@ -176,21 +176,21 @@ def train(total_loss, global_step, optimizer, learning_rate, moving_average_deca
     
         grads = opt.compute_gradients(total_loss, update_gradient_vars)
         
-    # Apply gradients.
+    # Apply gradients.应用梯度下降计算得到对应参数
     apply_gradient_op = opt.apply_gradients(grads, global_step=global_step)
   
-    # Add histograms for trainable variables.
+    # Add histograms for trainable variables.为可训练量添加直方图
     if log_histograms:
         for var in tf.trainable_variables():
             tf.summary.histogram(var.op.name, var)
    
-    # Add histograms for gradients.
+    # Add histograms for gradients.为简便图像添加直方图
     if log_histograms:
         for grad, var in grads:
             if grad is not None:
                 tf.summary.histogram(var.op.name + '/gradients', grad)
   
-    # Track the moving averages of all trainable variables.
+    # Track the moving averages of all trainable variables.跟踪所有可训练变量的移动平均值
     variable_averages = tf.train.ExponentialMovingAverage(
         moving_average_decay, global_step)
     variables_averages_op = variable_averages.apply(tf.trainable_variables())
@@ -346,7 +346,7 @@ def split_dataset(dataset, split_ratio, mode):
             np.random.shuffle(paths)
             split = int(round(len(paths)*split_ratio))
             if split<min_nrof_images:
-                continue  # Not enough images for test set. Skip class...
+                continue  # Not enough images for test set. Skip class...没有足够的图像用于测试集，停止工作
             train_set.append(ImageClass(cls.name, paths[0:split]))
             test_set.append(ImageClass(cls.name, paths[split:-1]))
     else:
@@ -355,7 +355,7 @@ def split_dataset(dataset, split_ratio, mode):
 
 def load_model(model):
     # Check if the model is a model directory (containing a metagraph and a checkpoint file)
-    #  or if it is a protobuf file with a frozen graph
+    #  or if it is a protobuf file with a frozen graph  检查模型是否是模型目录（包含元图和检查点文件），或者它是否是带有冻结图的protobuf文件
     model_exp = os.path.expanduser(model)
     if (os.path.isfile(model_exp)):
         print('Model filename: %s' % model_exp)
@@ -414,7 +414,7 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
     
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
         
-        # Find the best threshold for the fold
+        # Find the best threshold for the fold 找到折叠的最佳门槛
         acc_train = np.zeros((nrof_thresholds))
         for threshold_idx, threshold in enumerate(thresholds):
             _, _, acc_train[threshold_idx] = calculate_accuracy(threshold, dist[train_set], actual_issame[train_set])
@@ -458,7 +458,7 @@ def calculate_val(thresholds, embeddings1, embeddings2, actual_issame, far_targe
     
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
       
-        # Find the threshold that gives FAR = far_target
+        # Find the threshold that gives FAR = far_target 找到给出FAR = far_target的阈值
         far_train = np.zeros(nrof_thresholds)
         for threshold_idx, threshold in enumerate(thresholds):
             _, far_train[threshold_idx] = calculate_val_far(threshold, dist[train_set], actual_issame[train_set])
@@ -488,7 +488,7 @@ def calculate_val_far(threshold, dist, actual_issame):
 
 def store_revision_info(src_path, output_dir, arg_string):
     try:
-        # Get git hash
+        # Get git hash 获取git的哈希函数值
         cmd = ['git', 'rev-parse', 'HEAD']
         gitproc = Popen(cmd, stdout = PIPE, cwd=src_path)
         (stdout, _) = gitproc.communicate()
@@ -497,7 +497,7 @@ def store_revision_info(src_path, output_dir, arg_string):
         git_hash = ' '.join(cmd) + ': ' +  e.strerror
   
     try:
-        # Get local changes
+        # Get local changes 获取本地的更改数据
         cmd = ['git', 'diff', 'HEAD']
         gitproc = Popen(cmd, stdout = PIPE, cwd=src_path)
         (stdout, _) = gitproc.communicate()
@@ -505,11 +505,11 @@ def store_revision_info(src_path, output_dir, arg_string):
     except OSError as e:
         git_diff = ' '.join(cmd) + ': ' +  e.strerror
     
-    # Store a text file in the log directory
+    # Store a text file in the log directory 将文本文件存储在日志目录中
     rev_info_filename = os.path.join(output_dir, 'revision_info.txt')
     with open(rev_info_filename, "w") as text_file:
         text_file.write('arguments: %s\n--------------------\n' % arg_string)
-        text_file.write('tensorflow version: %s\n--------------------\n' % tf.__version__)  # @UndefinedVariable
+        text_file.write('tensorflow version: %s\n--------------------\n' % tf.__version__)  # @UndefinedVariable 获取tensorflow对应版本信息
         text_file.write('git hash: %s\n--------------------\n' % git_hash)
         text_file.write('%s' % git_diff)
 
