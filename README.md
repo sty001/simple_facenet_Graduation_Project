@@ -1,4 +1,4 @@
-# understand_facenet
+# simple_facenet_Graduation_Project
 ### 最适合初学者的facenet入门程序：
 
 主要是整理和注释了facenet的代码，以便初学者更好地理解facenet的代码。
